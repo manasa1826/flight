@@ -1,9 +1,9 @@
 import streamlit as st
-import pickle
+import joblib  # Use joblib instead of pickle
 
 # Load the saved model
 model_path = 'saved_models/flight_model.sav'
-flight_model = pickle.load(open(model_path, 'rb'))
+flight_model = joblib.load(model_path)  # Use joblib to load the model
 
 # Page title
 st.title('Flight Price Prediction')
@@ -47,12 +47,19 @@ with col1:
     flight_class = class_mapping[flight_class]
 
 with col2:
-    duration = st.text_input('Duration (in hours)', 'Enter flight duration')
+    duration = st.text_input('Duration (in hours)', '')
 
 # Button for prediction
 if st.button('Predict Flight Price'):
+    # Ensure duration is a valid float
+    try:
+        duration = float(duration)
+    except ValueError:
+        st.error("Please enter a valid numerical value for duration.")
+        st.stop()
+    
     # Prepare the input data
-    user_input = [airline, source_city, departure_time, stops, arrival_time, destination_city, flight_class, float(duration)]
+    user_input = [airline, source_city, departure_time, stops, arrival_time, destination_city, flight_class, duration]
     
     # Predict the flight price
     price_prediction = flight_model.predict([user_input])
